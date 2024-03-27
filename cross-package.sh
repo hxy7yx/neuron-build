@@ -7,8 +7,8 @@ branch=v2.8
 vendor=?
 arch=?
 version=?
-cnc=false
-custom=default
+cnc=true
+custom=cun
 
 while getopts ":a:v:o:c:n:" OPT; do
     case ${OPT} in
