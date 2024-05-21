@@ -3,7 +3,7 @@
 set -e
 
 home=/home/neuron
-branch=v2.8-batch
+branch=v2.8
 vendor=?
 arch=?
 version=?
@@ -94,6 +94,7 @@ cp $neuron_modules_dir/default_plugins.json \
     $package_dir/config/
 
 cp $neuron_dir/build/plugins/libplugin-mqtt.so \
+    $neuron_dir/build/plugins/libplugin-mqtt-xinao.so \
     $neuron_dir/build/plugins/libplugin-mqtt-xinao.so \
     $neuron_dir/build/plugins/libplugin-ekuiper.so \
     $package_dir/plugins/
