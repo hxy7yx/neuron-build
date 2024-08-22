@@ -59,6 +59,7 @@ mkdir -p $package_dir/plugins/schema
 mkdir -p $package_dir/logs
 mkdir -p $package_dir/persistence
 mkdir -p $package_dir/certs
+mkdir -p $package_dir/simulator
 
 
 cp .gitkeep $package_dir/logs/
@@ -100,6 +101,9 @@ cp $neuron_dir/build/plugins/libplugin-mqtt.so \
 
 cp $neuron_dir/build/plugins/schema/*.json \
     $package_dir/plugins/schema/
+
+cp $neuron_modules_dir/build/simulator/dlt645_simulator \
+	$package_dir/simulator/
 
 cp $neuron_modules_dir/build/plugins/libplugin-websocket.so \
         $neuron_modules_dir/build/plugins/libplugin-gewu.so \
