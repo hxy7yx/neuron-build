@@ -9,8 +9,9 @@ arch=?
 version=?
 cnc=false
 custom=default
+build_type=Release
 
-while getopts ":a:v:o:c:n:" OPT; do
+while getopts ":a:v:o:c:n:d:" OPT; do
     case ${OPT} in
         a)
             arch=$OPTARG
@@ -27,12 +28,25 @@ while getopts ":a:v:o:c:n:" OPT; do
         n)
             cnc=$OPTARG
             ;;
+        d)
+            build_type=$OPTARG
+            ;;
     esac
 done
 
-neuron_dir=$home/$branch/Program/$vendor/neuron
-neuron_modules_dir=$home/$branch/Program/$vendor/neuron-modules
-package_dir=$home/$branch/Program/$vendor/package/neuron
+
+case $build_type in
+    (Release)
+        neuron_dir=$home/$branch/Program/$vendor/neuron;
+        neuron_modules_dir=$home/$branch/Program/$vendor/neuron-modules;
+        package_dir=$home/$branch/Program/$vendor/package/neuron;;
+    (Debug)
+        neuron_dir=$home/$branch/Program_Debug/$vendor/neuron; 
+        neuron_modules_dir=$home/$branch/Program_Debug/$vendor/neuron-modules;
+        package_dir=$home/$branch/Program_Debug/$vendor/package/neuron;;
+esac
+
+
 library=$home/$branch/libs/$vendor
 script_dir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P  )"
 
@@ -80,6 +94,8 @@ cp $neuron_modules_dir/default_plugins.json \
 
 cp $neuron_dir/build/plugins/libplugin-mqtt.so \
     $neuron_dir/build/plugins/libplugin-ekuiper.so \
+    $neuron_dir/build/plugins/libplugin-aws-iot.so \
+    $neuron_dir/build/plugins/libplugin-azure-iot.so \
     $package_dir/plugins/
 
 cp $neuron_dir/build/plugins/schema/*.json \
@@ -105,8 +121,12 @@ cp $neuron_modules_dir/build/plugins/libplugin-websocket.so \
         $neuron_modules_dir/build/plugins/libplugin-df1.so \
         $neuron_modules_dir/build/plugins/libplugin-comli.so \
         $neuron_modules_dir/build/plugins/libplugin-mewtocol.so \
-        $neuron_modules_dir/build/plugins/libplugin-iec104.so \
+        $neuron_modules_dir/build/plugins/libplugin-iec104-standard.so \
+        $neuron_modules_dir/build/plugins/libplugin-iec102.so \
+        $neuron_modules_dir/build/plugins/libplugin-iec103.so \
+        $neuron_modules_dir/build/plugins/libplugin-iec101.so \
         $neuron_modules_dir/build/plugins/libplugin-iec61850.so \
+        $neuron_modules_dir/build/plugins/libplugin-iec61850-browse.so \
         $neuron_modules_dir/build/plugins/libplugin-dlt645-2007.so \
         $neuron_modules_dir/build/plugins/libplugin-dlt645-1997.so \
         $neuron_modules_dir/build/plugins/libplugin-bacnet.so \
@@ -117,6 +137,8 @@ cp $neuron_modules_dir/build/plugins/libplugin-websocket.so \
         $neuron_modules_dir/build/plugins/libplugin-modbus-rtu.so \
         $neuron_modules_dir/build/plugins/libplugin-modbus-qh-tcp.so \
         $neuron_modules_dir/build/plugins/libplugin-inovance-modbus-tcp.so \
+        $neuron_modules_dir/build/plugins/libplugin-modbus-ascii.so \
+        $neuron_modules_dir/build/plugins/libplugin-xinje-modbus-rtu.so \
         $neuron_modules_dir/build/plugins/libplugin-hsms.so \
         $neuron_modules_dir/build/plugins/libplugin-kuka.so \
         $neuron_modules_dir/build/plugins/libplugin-license-server.so \
@@ -124,6 +146,9 @@ cp $neuron_modules_dir/build/plugins/libplugin-websocket.so \
         $neuron_modules_dir/build/plugins/libplugin-EtherNet-IP-5500.so \
         $neuron_modules_dir/build/plugins/libplugin-srtp.so \
         $neuron_modules_dir/build/plugins/libplugin-mtconnect.so \
+        $neuron_modules_dir/build/plugins/libplugin-codesys3.so \
+        $neuron_modules_dir/build/plugins/libplugin-ab5000.so \
+        $neuron_modules_dir/build/plugins/libplugin-omron-cip.so \
         $package_dir/plugins/
 
 cp $neuron_modules_dir/build/plugins/schema/*.json \
@@ -135,24 +160,48 @@ case $cnc in
             $neuron_modules_dir/build/plugins/libplugin-mitsubishi_cnc.so \
             $neuron_modules_dir/build/plugins/libplugin-heidenhain_cnc.so \
             $package_dir/plugins/;
-
-        cp $neuron_modules_dir/build/plugins/focas/libfocas32.so.1 $package_dir/;;
+        python3 update_default_plugins.py $package_dir/config/default_plugins.json "libplugin-focas.so,libplugin-mitsubishi_cnc.so,libplugin-heidenhain_cnc.so";;
     (false)
         echo "no cnc";;
 esac 
+
+cp $neuron_modules_dir/build/plugins/focas/libfocas32.so.1 $package_dir/
 
 case $custom in
     (cun)
         cp 	$neuron_modules_dir/build/plugins/libplugin-gewu2.so \
             $neuron_modules_dir/build/plugins/libplugin-s7comm-for-un.so \
-            $package_dir/plugins/;;
+            $package_dir/plugins/;
+            python3 update_default_plugins.py $package_dir/config/default_plugins.json "libplugin-gewu2.so,libplugin-s7comm-for-un.so";;
+    (hr)
+        cp  $neuron_modules_dir/build/plugins/libplugin-iec104.so \
+            $package_dir/plugins/;
+        python3 update_default_plugins.py $package_dir/config/default_plugins.json "libplugin-iec104.so";;
     (default)
         echo "no custom";;
+esac
+
+case $build_type in
+    (Debug)
+        if [ $vendor == "x86_64-neuron-linux-gnu" ]; then
+    	    cp /home/neuron/buildroot/$vendor/output/host/usr/$vendor/lib64/libasan.so.2.0.0 $package_dir/
+            cd $package_dir
+            ln -s ./libasan.so.2.0.0 libasan.so.2
+        fi;; 
+    (Release)
+        echo "release";;
 esac
 
 
 cd $package_dir/..
 rm -rf neuron*.tar.gz
 
-tar czf neuron-$version-linux-$arch.tar.gz neuron
-echo "neuron-$version-linux-$arch.tar.gz"
+
+case $build_type in
+    (Release)
+        tar czf neuron-$version-linux-$arch.tar.gz neuron;
+        echo "neuron-$version-linux-$arch.tar.gz";;
+    (Debug)
+        tar czf neuron-$version-debug-linux-$arch.tar.gz neuron;
+        echo "neuron-$version-debug-linux-$arch.tar.gz";;
+esac
