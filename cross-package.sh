@@ -156,6 +156,9 @@ cp $neuron_modules_dir/build/plugins/libplugin-websocket.so \
 cp $neuron_modules_dir/build/plugins/schema/*.json \
     $package_dir/plugins/schema/
 
+cp $neuron_modules_dir/build/simulator/*_simulator \
+    $package_dir/plugins/simulator/
+
 case $cnc in 
     (true)
         cp	$neuron_modules_dir/build/plugins/libplugin-focas.so \
