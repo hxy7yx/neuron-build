@@ -105,5 +105,5 @@ function compile_source_with_tag() {
 
 sudo rm -rf $neuron_dir/*
 mkdir -p $neuron_dir
-compile_source_with_tag $user neuron $branch
-compile_source_with_tag $user neuron-modules $branch
+compile_source_with_tag emqx neuron main
+compile_source_with_tag emqx neuron-modules main
