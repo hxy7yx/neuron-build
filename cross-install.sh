@@ -28,15 +28,15 @@ done
 
 case $cross in
     (true)  
-        gcc=$vendor-gcc;
-        gxx=$vendor-g++;;
+        gcc=/opt/gcc-linaro-5.3.1-2016.05-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc;
+        gxx=/opt/gcc-linaro-5.3.1-2016.05-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++;;
     (false) 
         gcc=$home/buildroot/$vendor/output/host/bin/$vendor-gcc;
         gxx=$home/buildroot/$vendor/output/host/bin/$vendor-g++;;
 esac
 
-install_dir=$home/$branch/libs/$vendor/
-library=$home/$branch/library/$vendor/
+install_dir=$home/$branch/libs/$vendor
+library=$home/$branch/library/$vendor
 
 echo "arch: "$arch
 echo "vendor: "$vendor
@@ -94,7 +94,7 @@ function build_openssl() {
     echo "Installing openssl (1.1.1)"
     case $cross in
         (true)  
-            compile_prefix=$vendor-;;
+            compile_prefix=/opt/gcc-linaro-5.3.1-2016.05-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-;;
         (false) 
             compile_prefix=$home/buildroot/$vendor/output/host/bin/$vendor-;;
     esac
@@ -102,7 +102,7 @@ function build_openssl() {
     git clone -b OpenSSL_1_1_1 https://github.com/openssl/openssl.git
     cd openssl
     mkdir -p $install_dir/openssl/ssl
-    platform=linux-$arch
+    platform=linux-armv4
     if [[ $arch == "riscv64" ]]; then
       platform=linux-generic64
     fi
@@ -146,7 +146,7 @@ function build_protobuf() {
     tar -xzvf protobuf-cpp-3.20.1.tar.gz
     cd protobuf-3.20.1
 
-    ./configure --prefix=$install_dir CC=$gcc --host=$vendor --enable-shared=no CFLAGS=-fPIC CXXFLAGS=-fPIC
+    ./configure --prefix=$install_dir CC=$gcc CXX=$gxx --host=$vendor --enable-shared=no CFLAGS=-fPIC CXXFLAGS=-fPIC
 
     make -j4
     make install

@@ -5,10 +5,10 @@ set -e
 home=/home/neuron
 bdb=v2.11
 library=$home/$bdb/libs
-vendor=?
-arch=?
+vendor=arm-linux-gnueabihf
+arch=arm
 branch=?
-cross=false
+cross=true
 user=emqx
 smart=false
 clib=glibc
@@ -52,7 +52,7 @@ esac
 
 case $cross in
     (true)
-        tool_dir=/usr/bin;;
+        tool_dir=/opt/gcc-linaro-5.3.1-2016.05-x86_64_arm-linux-gnueabihf/bin;;
     (false)
         tool_dir=$home/buildroot/$vendor/output/host/bin;;
 esac
@@ -63,7 +63,7 @@ function compile_source_with_tag() {
     local branch=$3
 
     cd $neuron_dir
-    git clone -b $branch git@github.com:${user}/${repo}.git
+    git clone -b $branch https://github.com/${user}/${repo}.git
     cd $repo
     git submodule update --init
     mkdir build && cd build
@@ -82,6 +82,8 @@ function compile_source_with_tag() {
             cmake .. -DCMAKE_BUILD_TYPE=$build_type -DDISABLE_UT=ON \
             -DTOOL_DIR=$tool_dir -DCOMPILER_PREFIX=$vendor \
             -DCMAKE_SYSTEM_PROCESSOR=$arch -DLIBRARY_DIR=$library \
+            -DCMAKE_C_COMPILER=$tool_dir/$vendor-gcc \
+            -DCMAKE_CXX_COMPILER=$tool_dir/$vendor-g++ \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/cross.cmake;;
     esac
 
@@ -105,5 +107,6 @@ function compile_source_with_tag() {
 
 sudo rm -rf $neuron_dir/*
 mkdir -p $neuron_dir
+
 compile_source_with_tag $user neuron $branch
 compile_source_with_tag $user neuron-modules $branch
